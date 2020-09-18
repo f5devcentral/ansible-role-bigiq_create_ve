@@ -5,12 +5,12 @@ Performs a series of steps needed to create a BIG-IP VE (Virtual Edition) from B
 This role is perfect to use along with [F5 automation tool chain (ATC) deploy declaration](https://galaxy.ansible.com/f5devcentral/atc_deploy) galaxy role used 
 to onboard the VE using DO with BIG-IQ.
 
-**Prerequisites:**
+# Prerequisites
 
-*Cloud Provider* and *Cloud Environment* need to be created on BIG-IQ, more details:
-- [AWS](https://techdocs.f5.com/en-us/bigiq-7-1-0/add-configure-big-ip-ve-in-aws-cloud.html)
-- [Azure](https://techdocs.f5.com/en-us/bigiq-7-1-0/add-configure-big-ip-ve-in-azure-cloud.html)
-- [VMware](https://techdocs.f5.com/en-us/bigiq-7-1-0/add-configure-big-ip-ve-in-vmware-environment.html)
+- *Cloud Provider* and *Cloud Environment* need to be created on BIG-IQ, more details:
+  - [AWS](https://techdocs.f5.com/en-us/bigiq-7-1-0/add-configure-big-ip-ve-in-aws-cloud.html)
+  - [Azure](https://techdocs.f5.com/en-us/bigiq-7-1-0/add-configure-big-ip-ve-in-azure-cloud.html)
+  - [VMware](https://techdocs.f5.com/en-us/bigiq-7-1-0/add-configure-big-ip-ve-in-vmware-environment.html)
 
 ## Role Variables
 
