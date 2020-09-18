@@ -1,0 +1,45 @@
+---
+
+- name: Get Cloud Environment details
+  uri:
+    url: https://{{ provider.server }}:{{ provider.server_port }}/mgmt/cm/cloud/environments?$filter=name%20eq%20'{{ cloud_environment }}'
+    method: GET
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    headers:
+      X-F5-Auth-Token: "{{ f5_auth_token }}"
+    status_code: 200, 202
+  register: json_response
+
+- name: Get the selfLink of the Cloud Environment
+  set_fact:
+    cloudEnvironments: "{{ json_response | json_query(query) }}"
+  vars: 
+    query: "json.items[0].selfLink"
+
+- name: Check if AWS
+  set_fact:
+    aws: "{{ json_response | json_query(query) }}"
+  vars: 
+    query: "json.items[0].awsProperties.vpc"
+
+- name: Check if Azure
+  set_fact:
+    azure: "{{ json_response | json_query(query) }}"
+  vars: 
+    query: "json.items[0].azureProperties.vnetName"
+
+- name: Check if vmware
+  set_fact:
+    vmware: "{{ json_response | json_query(query) }}"
+  vars: 
+    query: "json.items[0].vmwProperties.user"
+
+#- debug:
+#    var: aws
+
+#- debug:
+#    var: azure
+
+#- debug:
+#    var: vmware

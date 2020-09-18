@@ -1,0 +1,17 @@
+---
+dependencies: []
+
+galaxy_info:
+  role_name: bigiq_create_ve
+  author: rjouhann
+  description: Create a BIG-IP VE (Virtual Edition) from BIG-IQ in AWS, Azure or VMware.
+  company: F5 Networks
+  license: Apache
+  min_ansible_version: 2.7
+  platforms:
+    - name: TMOS
+      versions:
+        - all
+  galaxy_tags:
+    - f5
+    - bigiq

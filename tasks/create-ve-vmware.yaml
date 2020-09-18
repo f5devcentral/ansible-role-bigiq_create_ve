@@ -1,0 +1,205 @@
+---
+### DHCP
+- name: Create VE in VMware - DHCP
+  uri:
+    url: https://{{ provider.server }}:{{ provider.server_port }}/mgmt/cm/cloud/tasks/create-ve
+    method: POST
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    headers:
+      Content-Type: application/json
+      X-F5-Auth-Token: "{{ f5_auth_token }}"
+    body: |
+      {
+          "name": "{{ task_name }} - {{ ansible_date_time.iso8601 }}",
+          "veName": "{{ ve_name }}",
+          "environmentReference": {
+                  "link": "{{ cloudEnvironments }}"
+          }
+      }
+    body_format: json
+    status_code: 200, 202
+    validate_certs: false
+  register: json_response
+  when: 
+    - ip_pool_alias_name is not defined
+    - ip_pool_name is not defined
+
+- name: Check VE Create status - DHCP
+  uri:
+    url: "https://{{ provider.server }}:{{ provider.server_port }}/mgmt/cm/cloud/tasks/create-ve/{{ json_response.json.id }}"
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    headers:
+      Content-Type: application/json
+      X-F5-Auth-Token: "{{ f5_auth_token }}"
+  register: status
+  until: status.json.status in ['FINISHED', 'FAILED']
+  retries: 40
+  delay: 30
+  failed_when: "'FAILED' in status.json.status"
+  changed_when: "'FINISHED' in status.json.status"
+  when: 
+    - ip_pool_alias_name is not defined
+    - ip_pool_name is not defined
+
+- name: Save the veIPAddress - DHCP
+  set_fact:
+    ve_ip_Address: "{{ status.json.veIPAddress }}"
+  when: 
+    - ip_pool_alias_name is not defined
+    - ip_pool_name is not defined
+
+### IP Pool Alias
+- name: Create VE in VMware - ip_pool_alias_name
+  uri:
+    url: https://{{ provider.server }}:{{ provider.server_port }}/mgmt/cm/cloud/tasks/create-ve
+    method: POST
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    headers:
+      Content-Type: application/json
+      X-F5-Auth-Token: "{{ f5_auth_token }}"
+    body: |
+      {
+          "name": "{{ task_name }} - {{ ansible_date_time.iso8601 }}",
+          "veName": "{{ ve_name }}",
+          "environmentReference": {
+                  "link": "{{ cloudEnvironments }}"
+          },
+          "ipPoolAlias": "{{ ip_pool_alias_name }}"
+      }
+    body_format: json
+    status_code: 200, 202
+    validate_certs: false
+  register: json_response
+  when:
+    - ip_pool_alias_name is defined
+
+- name: Check VE Create status - ip_pool_alias_name
+  uri:
+    url: "https://{{ provider.server }}:{{ provider.server_port }}/mgmt/cm/cloud/tasks/create-ve/{{ json_response.json.id }}"
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    headers:
+      Content-Type: application/json
+      X-F5-Auth-Token: "{{ f5_auth_token }}"
+  register: status
+  until: status.json.status in ['FINISHED', 'FAILED']
+  retries: 40
+  delay: 30
+  failed_when: "'FAILED' in status.json.status"
+  changed_when: "'FINISHED' in status.json.status"
+  when:
+    - ip_pool_alias_name is defined
+
+- name: Save the veIPAddress - ip_pool_alias_name
+  set_fact:
+    ve_ip_Address: "{{ status.json.veIPAddress }}"
+  when:
+    - ip_pool_alias_name is defined
+
+### IP Pool
+- name: Get IP pools details - ip_pool_name
+  uri:
+    url: https://{{ provider.server }}:{{ provider.server_port }}/mgmt/cm/device/ip-pool/pools?$filter=name%20eq%20'{{ ip_pool_name }}'
+    method: GET
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    headers:
+      X-F5-Auth-Token: "{{ f5_auth_token }}"
+    status_code: 200, 202
+  register: json_response2
+  when:
+    - ip_pool_name is defined
+
+- name: Get the selfLink of ip_pool_name
+  set_fact:
+    ip_pool_name_selfLink: "{{ json_response2 | json_query(query) }}"
+  vars: 
+    query: "json.items[0].selfLink"
+
+- name: Create VE in VMware - ip_pool_name
+  uri:
+    url: https://{{ provider.server }}:{{ provider.server_port }}/mgmt/cm/cloud/tasks/create-ve
+    method: POST
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    headers:
+      Content-Type: application/json
+      X-F5-Auth-Token: "{{ f5_auth_token }}"
+    body: |
+      {
+          "name": "{{ task_name }} - {{ ansible_date_time.iso8601 }}",
+          "veName": "{{ ve_name }}",
+          "environmentReference": {
+                  "link": "{{ cloudEnvironments }}"
+          },
+          "ipPoolReference": {
+                  "link": "{{ ip_pool_name_selfLink }}"
+          }
+      }
+    body_format: json
+    status_code: 200, 202
+    validate_certs: false
+  register: json_response
+  when:
+    - ip_pool_name is defined
+
+- name: Save json_response.json.id
+  set_fact:
+    taskid: "{{ json_response.json.id }}"
+
+- name: Pause 4 minutes for the VE to be created in the cloud
+  pause:
+    minutes: 4
+
+- name: Get authentication token
+  uri:
+    url: "https://{{ provider.server }}:{{ provider.server_port }}/mgmt/shared/authn/login"
+    method: POST
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    body:
+      username: "{{ provider.user }}"
+      password: "{{ provider.password }}"
+      loginProviderName: "{{ provider.loginProviderName }}"
+    body_format: json
+  register: authtoken
+
+- name: Set the token fact if authentication succeeded
+  set_fact:
+    f5_auth_token: "{{ authtoken.json.token.token }}"
+  when: authtoken is success
+
+- name: Test authentication
+  uri:
+    url: "https://{{ provider.server }}:{{ provider.server_port }}/mgmt/shared/echo"
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    headers:
+      X-F5-Auth-Token: "{{ f5_auth_token }}"
+  register: status
+
+- name: Check VE Create status
+  uri:
+    url: "https://{{ provider.server }}:{{ provider.server_port }}/mgmt/cm/cloud/tasks/create-ve/{{ taskid }}"
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    headers:
+      Content-Type: application/json
+      X-F5-Auth-Token: "{{ f5_auth_token }}"
+  register: status
+  until: status.json.status in ['FINISHED', 'FAILED']
+  retries: 40
+  delay: 30
+  failed_when: "'FAILED' in status.json.status"
+  changed_when: "'FINISHED' in status.json.status"
+  when:
+    - ip_pool_name is defined
+
+- name: Save the veIPAddress - ip_pool_name
+  set_fact:
+    ve_ip_Address: "{{ status.json.veIPAddress }}"
+  when:
+    - ip_pool_name is defined

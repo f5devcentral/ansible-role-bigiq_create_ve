@@ -1,0 +1,108 @@
+---
+- name: Setup provider and varables
+  set_fact:
+    provider: "{{ provider }}"
+
+- name: Get authentication token
+  uri:
+    url: "https://{{ provider.server }}:{{ provider.server_port }}/mgmt/shared/authn/login"
+    method: POST
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    body:
+      username: "{{ provider.user }}"
+      password: "{{ provider.password }}"
+      loginProviderName: "{{ provider.loginProviderName }}"
+    body_format: json
+  register: authtoken
+
+- name: Set the token fact if authentication succeeded
+  set_fact:
+    f5_auth_token: "{{ authtoken.json.token.token }}"
+  when: authtoken is success
+
+- name: Test authentication
+  uri:
+    url: "https://{{ provider.server }}:{{ provider.server_port }}/mgmt/shared/echo"
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    headers:
+      X-F5-Auth-Token: "{{ f5_auth_token }}"
+  register: status
+
+- name: Get device provisioning type
+  uri:
+    url: "https://{{ provider.server }}:{{ provider.server_port }}/mgmt/cm/system/provisioning"
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    headers:
+      X-F5-Auth-Token: "{{ f5_auth_token }}"
+  register: rprov
+
+- name: Fail if you're running the role against a DCD device
+  fail:
+    msg: "This role should be run against a CM device, but you appear to be running it against a DCD device"
+  when: rprov.json.systemPersonality == 'logging_node'
+
+- name: Check if system is setup
+  uri:
+    url: "https://{{ provider.server }}:{{ provider.server_port }}/mgmt/shared/system/setup"
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    headers:
+      X-F5-Auth-Token: "{{ f5_auth_token }}"
+  register: setupchk
+
+- name: Stop if the system is not setup
+  fail:
+    msg: "The CM device has not been setup. Please onboard the DCD device first."
+  when: setupchk.json.isSystemSetup is not defined or not setupchk.json.isSystemSetup|bool
+
+- name: Run task to get type of cloud
+  include_tasks: "get-cloud-type.yaml"
+
+- name: Run task to create VE in AWS
+  include_tasks: "create-ve-aws.yaml"
+  when: 
+    - aws | length > 0
+
+- name: Run task to create VE in Azure
+  include_tasks: "create-ve-azure.yaml"
+  when: 
+    - azure | length > 0
+
+- name: Run task to create VE in VMware
+  include_tasks: "create-ve-vmware.yaml"
+  when: 
+    - vmware | length > 0
+
+- name: BIG-IP VE Port 8443 for AWS and Azure
+  set_fact:
+    port: "8443"
+  when: vmware | length == 0
+
+- name: BIG-IP VE Port 443 for VMware
+  set_fact:
+    port: "443"
+  when: vmware | length > 0
+
+- name: Check if new VE is available
+  uri:
+    url: "https://{{ ve_ip_Address }}:{{ port }}"
+    method: GET
+    force_basic_auth: yes
+    validate_certs: no
+    status_code: [200]
+  register: result
+  until: result.status == 200
+  retries: 30
+  delay: 30
+
+- name: Show VE IP address
+  debug:
+    msg: "ve_ip_Address: {{ ve_ip_Address }}"
+
+- name: Show VE Private Key Name for AWS
+  debug:
+    msg: "private_key_filename: {{ private_key_filename }}"
+  when: aws | length > 0

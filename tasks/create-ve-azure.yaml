@@ -1,0 +1,80 @@
+---
+- name: Create VE in Azure
+  uri:
+    url: https://{{ provider.server }}:{{ provider.server_port }}/mgmt/cm/cloud/tasks/create-ve
+    method: POST
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    headers:
+      Content-Type: application/json
+      X-F5-Auth-Token: "{{ f5_auth_token }}"
+    body: |
+      {
+          "name": "{{ task_name }} - {{ ansible_date_time.iso8601 }}",
+          "veName": "{{ ve_name }}",
+          "environmentReference": {
+                  "link": "{{ cloudEnvironments }}"
+          },
+          "azureAdminPassword": "{{ azure_admin_password }}"
+      }
+    body_format: json
+    status_code: 200, 202
+    validate_certs: false
+  register: json_response
+  when: azure | length > 0
+  no_log: True # Hide azure_admin_password
+
+- name: Save json_response.json.id
+  set_fact:
+    taskid: "{{ json_response.json.id }}"
+
+- name: Pause 4 minutes for the VE to be created in the cloud
+  pause:
+    minutes: 4
+
+- name: Get authentication token
+  uri:
+    url: "https://{{ provider.server }}:{{ provider.server_port }}/mgmt/shared/authn/login"
+    method: POST
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    body:
+      username: "{{ provider.user }}"
+      password: "{{ provider.password }}"
+      loginProviderName: "{{ provider.loginProviderName }}"
+    body_format: json
+  register: authtoken
+
+- name: Set the token fact if authentication succeeded
+  set_fact:
+    f5_auth_token: "{{ authtoken.json.token.token }}"
+  when: authtoken is success
+
+- name: Test authentication
+  uri:
+    url: "https://{{ provider.server }}:{{ provider.server_port }}/mgmt/shared/echo"
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    headers:
+      X-F5-Auth-Token: "{{ f5_auth_token }}"
+  register: status
+
+- name: Check VE Create status
+  uri:
+    url: "https://{{ provider.server }}:{{ provider.server_port }}/mgmt/cm/cloud/tasks/create-ve/{{ taskid }}"
+    timeout: "{{ timeout }}"
+    validate_certs: "{{ validate_certs }}"
+    headers:
+      Content-Type: application/json
+      X-F5-Auth-Token: "{{ f5_auth_token }}"
+  register: status
+  until: status.json.status in ['FINISHED', 'FAILED']
+  retries: 40
+  delay: 30
+  failed_when: "'FAILED' in status.json.status"
+  changed_when: "'FINISHED' in status.json.status"
+  no_log: True # Hide azure_admin_password
+
+- name: Save the veIPAddress for all cloud
+  set_fact:
+    ve_ip_Address: "{{ status.json.veIPAddress }}"
