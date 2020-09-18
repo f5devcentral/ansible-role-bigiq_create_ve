@@ -26,7 +26,7 @@ for the **CM BIG-IQ** device.
           server_port: 443
           password: secret
           auth_provider: tmos
-          validate_certs: no
+          validate_certs: false
 
 Define where you want to create your VE based on the ``cloud_environment`` created in BIG-IQ.
 
@@ -52,7 +52,7 @@ Define where you want to create your VE based on the ``cloud_environment`` creat
           server_port: 443
           password: secret
           auth_provider: tmos
-          validate_certs: no
+          validate_certs: false
 
       tasks:
           - name: Create a VE in VMware
@@ -80,7 +80,7 @@ Define where you want to create your VE based on the ``cloud_environment`` creat
           server_port: 443
           password: secret
           auth_provider: tmos
-          validate_certs: no
+          validate_certs: false
 
       tasks:
           - name: Create a VE in AWS
@@ -111,7 +111,7 @@ Define where you want to create your VE based on the ``cloud_environment`` creat
           server_port: 443
           password: secret
           auth_provider: tmos
-          validate_certs: no
+          validate_certs: false
 
       tasks:
           - name: Create a VE in Azure 

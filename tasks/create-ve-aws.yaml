@@ -4,7 +4,7 @@
     url: https://{{ provider.server }}:{{ provider.server_port }}/mgmt/cm/cloud/tasks/create-ve
     method: POST
     timeout: "{{ timeout }}"
-    validate_certs: "{{ validate_certs }}"
+    validate_certs: "{{ provider.validate_certs }}"
     headers:
       Content-Type: application/json
       X-F5-Auth-Token: "{{ f5_auth_token }}"
@@ -18,7 +18,6 @@
       }
     body_format: json
     status_code: 200, 202
-    validate_certs: false
   register: json_response
 
 - name: Save json_response.json.id
@@ -34,7 +33,7 @@
     url: "https://{{ provider.server }}:{{ provider.server_port }}/mgmt/shared/authn/login"
     method: POST
     timeout: "{{ timeout }}"
-    validate_certs: "{{ validate_certs }}"
+    validate_certs: "{{ provider.validate_certs }}"
     body:
       username: "{{ provider.user }}"
       password: "{{ provider.password }}"
@@ -51,7 +50,7 @@
   uri:
     url: "https://{{ provider.server }}:{{ provider.server_port }}/mgmt/shared/echo"
     timeout: "{{ timeout }}"
-    validate_certs: "{{ validate_certs }}"
+    validate_certs: "{{ provider.validate_certs }}"
     headers:
       X-F5-Auth-Token: "{{ f5_auth_token }}"
   register: status
@@ -60,7 +59,7 @@
   uri:
     url: "https://{{ provider.server }}:{{ provider.server_port }}/mgmt/cm/cloud/tasks/create-ve/{{ taskid }}"
     timeout: "{{ timeout }}"
-    validate_certs: "{{ validate_certs }}"
+    validate_certs: "{{ provider.validate_certs }}"
     headers:
       Content-Type: application/json
       X-F5-Auth-Token: "{{ f5_auth_token }}"
