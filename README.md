@@ -25,7 +25,7 @@ for the **CM BIG-IQ** device.
           server: 10.1.1.4
           server_port: 443
           password: secret
-          loginProviderName: tmos
+          auth_provider: tmos
           validate_certs: no
 
 Define where you want to create your VE based on the ``cloud_environment`` created in BIG-IQ.
@@ -51,7 +51,7 @@ Define where you want to create your VE based on the ``cloud_environment`` creat
           server: "{{ ansible_host }}"
           server_port: 443
           password: secret
-          loginProviderName: tmos
+          auth_provider: tmos
           validate_certs: no
 
       tasks:
@@ -79,7 +79,7 @@ Define where you want to create your VE based on the ``cloud_environment`` creat
           server: "{{ ansible_host }}"
           server_port: 443
           password: secret
-          loginProviderName: tmos
+          auth_provider: tmos
           validate_certs: no
 
       tasks:
@@ -110,7 +110,7 @@ Define where you want to create your VE based on the ``cloud_environment`` creat
           server: "{{ ansible_host }}"
           server_port: 443
           password: secret
-          loginProviderName: tmos
+          auth_provider: tmos
           validate_certs: no
 
       tasks:
