@@ -7,7 +7,7 @@ to onboard the VE using DO with BIG-IQ.
 
 **Prerequisites:**
 
-*Cloud Provider* and *Cloud Environment* needs to be created on BIG-IQ, more details on how to do:
+*Cloud Provider* and *Cloud Environment* need to be created on BIG-IQ, more details:
 - [AWS](https://techdocs.f5.com/en-us/bigiq-7-1-0/add-configure-big-ip-ve-in-aws-cloud.html)
 - [Azure](https://techdocs.f5.com/en-us/bigiq-7-1-0/add-configure-big-ip-ve-in-azure-cloud.html)
 - [VMware](https://techdocs.f5.com/en-us/bigiq-7-1-0/add-configure-big-ip-ve-in-vmware-environment.html)
@@ -30,7 +30,7 @@ for the **CM BIG-IQ** device.
 
 Define where you want to create your VE based on the ``cloud_environment`` created in BIG-IQ.
 
-    cloud_environment: "Cloud Environment Name"
+    cloud_environment: "Cloud Environment Name in BIG-IQ"
     ve_name: bigipvm
 
     ip_pool_name: management-pool # Vmware only
@@ -118,7 +118,7 @@ Define where you want to create your VE based on the ``cloud_environment`` creat
             include_role:
               name: f5devcentral.bigiq_create_ve
             vars:
-              cloud_environment: "AWS US East N. Virginia"
+              cloud_environment: "Azure East US"
               ve_name: bigipvm-azure
               azure_admin_password: myPassword
             register: status
