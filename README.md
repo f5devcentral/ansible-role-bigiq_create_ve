@@ -2,7 +2,7 @@
 
 Performs a series of steps needed to create a BIG-IP VE (Virtual Edition) from BIG-IQ in AWS, Azure or VMware.
 
-This role is perfect to use along with https://galaxy.ansible.com/f5devcentral/atc_deploy used 
+This role is perfect to use along with [F5 automation tool chain (ATC) deploy declaration](https://galaxy.ansible.com/f5devcentral/atc_deploy) galaxy role used 
 to onboard the VE using DO with BIG-IQ.
 
 **Prerequisites:**
