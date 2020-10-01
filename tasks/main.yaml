@@ -98,6 +98,10 @@
   retries: 30
   delay: 30
 
+- name: Wait an extra 3 min to let BIG-IP services to start fully
+  pause:
+    minutes: 3
+
 - name: Show VE IP address
   debug:
     msg: "ve_ip_Address: {{ ve_ip_Address }}"
