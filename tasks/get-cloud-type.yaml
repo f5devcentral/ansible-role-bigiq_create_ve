@@ -1,5 +1,4 @@
 ---
-
 - name: Get Cloud Environment details
   uri:
     url: https://{{ provider.server }}:{{ provider.server_port }}/mgmt/cm/cloud/environments?$filter=name%20eq%20'{{ cloud_environment }}'

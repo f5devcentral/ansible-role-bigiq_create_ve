@@ -1,7 +1,6 @@
 ---
 timeout: 120
 
-cloud_environment: "Cloud Environment Name"
 ve_name: bigipvm
 
 task_name: "Ansible Task"

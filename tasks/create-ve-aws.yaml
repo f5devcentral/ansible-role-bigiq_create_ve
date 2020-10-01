@@ -77,4 +77,3 @@
 - name: Save the veIPAddress for all cloud
   set_fact:
     ve_ip_Address: "{{ status.json.veIPAddress }}"
-

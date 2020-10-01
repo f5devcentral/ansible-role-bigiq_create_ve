@@ -30,6 +30,8 @@ for the **CM BIG-IQ** device.
 
 Define where you want to create your VE based on the ``cloud_environment`` created in BIG-IQ.
 
+    task_name: "Ansible Task"
+
     cloud_environment: "Cloud Environment Name in BIG-IQ"
     ve_name: bigipvm
 
