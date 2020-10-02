@@ -44,7 +44,7 @@
 
 - name: Save the veIPAddress - DHCP
   set_fact:
-    ve_ip_Address: "{{ status.json.veIPAddress }}"
+    ve_ip_address: "{{ status.json.veIPAddress }}"
   when: 
     - ip_pool_alias_name is not defined
     - ip_pool_name is not defined
@@ -93,7 +93,7 @@
 
 - name: Save the veIPAddress - ip_pool_alias_name
   set_fact:
-    ve_ip_Address: "{{ status.json.veIPAddress }}"
+    ve_ip_address: "{{ status.json.veIPAddress }}"
   when:
     - ip_pool_alias_name is defined
 
@@ -197,6 +197,6 @@
 
 - name: Save the veIPAddress - ip_pool_name
   set_fact:
-    ve_ip_Address: "{{ status.json.veIPAddress }}"
+    ve_ip_address: "{{ status.json.veIPAddress }}"
   when:
     - ip_pool_name is defined

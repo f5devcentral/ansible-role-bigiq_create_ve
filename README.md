@@ -68,7 +68,7 @@ Define where you want to create your VE based on the ``cloud_environment`` creat
 
           - name: Get VMware BIG-IP VE IP address (port 443)
             debug:
-              msg: "{{ ve_ip_Address }}"
+              msg: "{{ ve_ip_address }}"
 
 **AWS**
 
@@ -95,11 +95,13 @@ Define where you want to create your VE based on the ``cloud_environment`` creat
 
           - name: Get AWS BIG-IP VE IP address (port 8443)
             debug:
-              msg: "{{ ve_ip_Address }}"
+              msg: "{{ ve_ip_address }}"
 
           - name: Get AWS BIG-IP VE private Key Filename
             debug:
               msg: "{{ private_key_filename }}"
+
+*Note: make sure you specify ``"targetPort": 8443`` in your DO declaration as the BIG-IP management on single nic VEs happens on port 8443.*
 
 **Azure**
 
@@ -127,8 +129,9 @@ Define where you want to create your VE based on the ``cloud_environment`` creat
 
           - name: Get Azure BIG-IP VE IP address (port 8443)
             debug:
-              msg: "{{ ve_ip_Address }}"
+              msg: "{{ ve_ip_address }}"
 
+*Note: make sure you specify ``"targetPort": 8443`` in your DO declaration as the BIG-IP management on single nic VEs happens on port 8443.*
 
 ## License
 

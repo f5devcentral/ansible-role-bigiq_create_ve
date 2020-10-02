@@ -88,7 +88,7 @@
 
 - name: Check if new VE is available
   uri:
-    url: "https://{{ ve_ip_Address }}:{{ port }}"
+    url: "https://{{ ve_ip_address }}:{{ port }}"
     method: GET
     force_basic_auth: yes
     validate_certs: "{{ provider.validate_certs }}"
@@ -98,13 +98,13 @@
   retries: 30
   delay: 30
 
-- name: Wait an extra 3 min to let BIG-IP services to start fully
-  pause:
-    minutes: 3
+# - name: Wait an extra 3 min to let BIG-IP services to start fully
+#   pause:
+#     minutes: 3
 
 - name: Show VE IP address
   debug:
-    msg: "ve_ip_Address: {{ ve_ip_Address }}"
+    msg: "ve_ip_address: {{ ve_ip_address }}"
 
 - name: Show VE Private Key Name for AWS
   debug:
